@@ -36,6 +36,14 @@
 *.exe
 *.out
 *.app
+sanss
 
 # debug information files
 *.dwo
+
+# hidden files
+.DS_Store
+.clangd
+
+# build dir
+build/

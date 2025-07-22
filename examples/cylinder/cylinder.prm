@@ -1,0 +1,40 @@
+subsection Time parameters
+    set Initial time    = 0.
+    set Final time      = 30.
+    set Delta t         = 0.1
+    set Is steady       = false
+end
+
+subsection Geometry
+    set Test case               = cylinder
+    set Number of refinements   = 2
+end
+
+subsection Governing equations
+    set Kinematic viscosity = 0.0005
+    set Stabilisation       = gls
+end
+
+subsection Finite Element
+    set u degree    = 1
+    set p degree    = 1
+    set Q degree    = 2
+    set Pressure has zero mean = false
+end
+
+subsection Output control
+    set Output directory    = ./cylinder_output
+    set Write interval      = 1
+    set Compute strain rate = false
+    set Compute vorticity   = true
+end
+
+subsection Newton method
+    set Max nonlinear iterations    = 10
+    set Nonlinear tolerance         = 1e-8
+    subsection Linear solver
+        set Method  		  = gmres
+        set Max linear iterations = 100
+        set Linear tolerance      = 1e-5
+    end
+end

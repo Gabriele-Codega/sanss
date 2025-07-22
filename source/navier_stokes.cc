@@ -67,11 +67,11 @@ NavierStokes<dim>::NavierStokes(const std::string fname)
     fe = std::make_shared<FESystem<dim>>(FE_Q<dim>(degree_u), dim, FE_Q<dim>(degree_p), 1);
 
     if (test_case == TestCase::cavity)
-	makeCavity(triangulation, boundary_conditions,6);
+	makeCavity(triangulation, boundary_conditions, n_refinements);
     else if (test_case == TestCase::cylinder)
 	makeCylinder(triangulation, boundary_conditions, n_refinements);
     else if (test_case == TestCase::channel)
-	makeChannel(triangulation, boundary_conditions);
+	makeChannel(triangulation, boundary_conditions, n_refinements);
 
     dof_handler.clear();
     dof_handler.reinit(triangulation);

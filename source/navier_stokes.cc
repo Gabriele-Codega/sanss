@@ -547,7 +547,7 @@ void NavierStokes<dim>::solve_newton(bool initial_step)
     pcout << "\n  Newton solver -- initial residual = " << current_residual << std::endl;
 
 
-    while ((current_residual > nonlinear_tolerance && ++it <= max_nonlinear_iterations) || it == 0)
+    while ((current_residual > nonlinear_tolerance && ++it <= max_nonlinear_iterations) || it++ == 0)
     {
 	pcout << "    Iteration " << it << std::endl;
 	

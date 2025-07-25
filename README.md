@@ -13,6 +13,9 @@
 
 This is a Finite Element solver for the Navier-Stokes equations.
 
+saNSs implements Galerkin Least Squares stabilisation for the time-dependent equations, and employs an implicit Euler scheme for time integration. The nonlinear system is solved with a monolithic appoach, via Newton iterations.
+
+More details as well as an example are provided in [details.md](details.md).
 
 ## Getting started
 > [!IMPORTANT]

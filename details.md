@@ -3,12 +3,14 @@ In a nutshell, saNSs is a fully implicit solver for the time-dependent Navier-St
 
 ## The governing equations
 The Navier-Stokes equations for an incompressible fluid can be written in strong form as
+
 $$
 \begin{split}
 \frac{\partial \boldsymbol{u}}{\partial t} + \boldsymbol{u}\cdot \nabla \boldsymbol{u} + \nabla p - \nu \Delta \boldsymbol{u} &= 0 \quad \text{in }\Omega,\\
 \nabla \cdot \boldsymbol{u} &= 0 \quad \text{in }\Omega,
 \end{split}
 $$
+
 where $\nu$ is the kinematic viscosity and $p$ is the kinematic pressure. As per usual, these equations need to be complemented with initial and boundary conditions.
 
 Given the strong form, the *weak* form of the governing equations is found by testing the first equation with $\boldsymbol{v}\in V$ and the second equation with $q \in Q$, where $V$ and $Q$ are appropriate spaces that guarantee the inf-sup stability of the problem. The weak form reads
@@ -35,6 +37,7 @@ At this point we could simply choose different spaces, and indeed the pair $\mat
 One of the possible stabilisations is the *Galerkin Least Squares* formulation. The idea here is to add to the original formulation an extra term given by the residual of the strong form, tested with the strong differential operator applied to test functions. This yields a formulation that not only is consistent (as the residual of the exact solution is zero), but also allows for the use of equal-degree elements, regularises the solution in convection-dominated flows, and introduces a coupling of pressure degrees of freedom with themselves, effectively getting rid of the zero block in the system matrix of the non-stabilised problem.
 
 The weak form then reads
+
 $$
 \begin{split}
 &\int_\Omega \frac{\partial \boldsymbol{u}}{\partial t} \cdot \boldsymbol{v} 
@@ -45,18 +48,22 @@ $$
      & + \sum_\mathcal{T} \int_\mathcal{T} \tau_{LSIC} \nabla \cdot \boldsymbol{u} \; \nabla \cdot \boldsymbol{v} = 0, \\
 \end{split}
 $$
+
 where $\mathcal T$ is an element of the triangulation, and $\tau_{GLS}$ and $\tau_{LSIC}$ are coefficients that need to be specified in order to provide an appropriate amount of stabilisation. As it turns out, a good choice for these parameters is
+
 $$
 \begin{split}
 \tau_{GLS} &= \left [ \frac{1}{\Delta t ^2} + \left( \frac{2~|\boldsymbol{u}|}{h}\right )^2 + 9\left( \frac{4~\nu}{h^2}\right )^2 \right ]^{-1/2}, \\
 \tau_{LSIC} &= \frac{|\boldsymbol u|~ h}{2},
 \end{split}
 $$
+
 with $\Delta t$ the time step and $h$ a characteristic size of the element. Following what is done in [Lethe](https://github.com/chaos-polymtl/lethe), $h$ is chosen to be the diameter of a sphere having the same volume as the element.
 
 
 ### Time discretisation
 Here we shall not employ space-time discretisations, but rather we will use an implicit Euler scheme. With this choice of time discretisation, the weak form becomes
+
 $$
 \begin{split}
 &\int_\Omega \frac{\boldsymbol{u}^{n+1}-\boldsymbol{u}^n}{\Delta t} \cdot \boldsymbol{v} 
@@ -67,20 +74,26 @@ $$
      & + \sum_\mathcal{T} \int_\mathcal{T} \tau_{LSIC} \nabla \cdot \boldsymbol{u}^{n+1} \; \nabla \cdot \boldsymbol{v} = 0. \\
 \end{split}
 $$
+
 Here we assume that the solution at time $t_n$ is known ( for $n=0$ it will be the initial condition ), and so the challenge is to solve a nonlinear system of equations for the unknowns $(\boldsymbol u^{n+1}, p^{n+1})$. 
 
 ## Nonlinear solver
 Provided that we can come up with a good initial guess of what the solution should be -- and we are willing to do a bit of calculations -- a good choice is to go with Newton's method, which should quickly converge to the right solution. Indeed, since we are dealing with time dependent problems, we could just use the solution at time $t_n$ as initial guess for the solution at time $t_{n+1}$, so we should be good to go.
 
 Now that we have a good initial guess, all that is left is to refine the solution until we are satisfied with it. In other words, given the guess $(\boldsymbol u_0, p_0)$, at each iteration of the method we compute 
+
 $$
 \boldsymbol u_{k+1} = \boldsymbol u_k + \delta \boldsymbol u, \quad p_{k+1} = p_{k} + \delta p,
 $$
+
 where $(\delta \boldsymbol u, \delta p)$ are found by solving the linear system
+
 $$
 J_{\boldsymbol u_k, p_k} (\delta\boldsymbol u, \delta p) = -\mathcal F(\boldsymbol u_k, p_k).
 $$
+
 In this expression, $\mathcal F$ is the nonlinear operator we are dealing with, i.e. the discretised weak form of our equation, and $J$ is its Jacobian, which in our case is the Gateaux derivative of the governing equations. With a bit of care and a lot of patience we find that the Jacobian is given by
+
 $$
 \begin{split}
 &\int_\Omega \frac{\delta \boldsymbol{u}}{\Delta t} \cdot \boldsymbol{v} 
@@ -92,6 +105,7 @@ $$
      & + \sum_\mathcal{T} \int_\mathcal{T} \tau_{LSIC} \nabla \cdot \delta \boldsymbol{u} \; \nabla \cdot \boldsymbol{v} = 0 . \\
 \end{split}
 $$
+
 At each Newton iteration then we assemble the Jacobian and right-hand side, we solve the linear system for the update vectors and finally update the solution. This process is repeated until the norm of the residual falls below a predefined threshold, at which point we can move on to the next time step.
 
 In practice, solving the linear system at each Newton iteration is no easy task, since the system matrix is non-symmetric and possibly ill-conditioned. Here we shall use an iterative linear solver, GMRES, with an AMG preconditioner. 
@@ -102,7 +116,7 @@ Also, it should be noted that in deriving the Jacobian, the derivatives of $\tau
 We shall test the solver by simulating the 2-dimensional lid-driven cavity, and comparing the results with those by [Ghia et al. (1982)](https://www.sciencedirect.com/science/article/pii/0021999182900584). 
 
 The setup is quite simple: the domain is the square $[0, 1]\times[0,1]$, and we impose homogeneous Dirichlet boundary conditions on all sides but the top one, where instead we impose a constant velocity along the $x$ direction of magnitude $1~m/s$. As anticipated, we shall constrain the pressure to have zero mean over the domain. Here is a sketch of the domain.
-![cavity domain](/Downloads/cavity.png)
+![cavity domain](./figures/cavity.png)
 
 We shall perform simulations for different values of the Reynolds number $Re = \frac{U\; L}{\nu}$ and compare stabilised equal-order solutions with non-stabilised solutions. We let the system evolve until a steady state is reached, and compare the velocity profile with that by [Ghia et al. (1982)](https://www.sciencedirect.com/science/article/pii/0021999182900584). Note that since the geometry is fixed and the top velocity is fixed, then for all cases we have $U=1\;m/s, L = 1\;m$, so we get different $Re$ by setting $\nu = 1/Re$.
 

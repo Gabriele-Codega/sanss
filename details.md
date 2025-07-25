@@ -94,17 +94,17 @@ $$
 
 In this expression, $\mathcal F$ is the nonlinear operator we are dealing with, i.e. the discretised weak form of our equation, and $J$ is its Jacobian, which in our case is the Gateaux derivative of the governing equations. With a bit of care and a lot of patience we find that the Jacobian is given by
 
-$$
+```math
 \begin{split}
 &\int_\Omega \frac{\delta \boldsymbol{u}}{\Delta t} \cdot \boldsymbol{v} 
-    + \int_\Omega (\delta \boldsymbol{u}\cdot \nabla \boldsymbol{u}_k + \boldsymbol{u}_k \cdot \nabla \delta \boldsymbol{u})\cdot \boldsymbol{v} 
+    + \int_\Omega ( \delta \boldsymbol{u}\cdot \nabla \boldsymbol{u}_k + \boldsymbol{u}_k \cdot \nabla \delta \boldsymbol{u}) \cdot \boldsymbol{v} 
     - \int_\Omega \delta p\nabla \cdot \boldsymbol{v}
     + \int_\Omega \nu \nabla \delta \boldsymbol{u} : \nabla \boldsymbol{v} + \int_\Omega q \nabla \cdot \delta \boldsymbol{u} \\
     &+ \sum_\mathcal{T} \int_\mathcal{T} \tau_{GLS} \left ( \frac{\delta \boldsymbol{u}}{\Delta t} + \delta \boldsymbol{u}\cdot \nabla \boldsymbol{u}_k + \boldsymbol{u}_k \cdot \nabla \delta \boldsymbol{u} + \nabla \delta p - \nu \Delta \delta \boldsymbol{u} \right)\cdot \left (\boldsymbol{u}_k \cdot \nabla \boldsymbol{v} + \nabla q - \nu \Delta \boldsymbol{v} \right) \\
     &+ \sum_\mathcal{T} \int_\mathcal{T} \tau_{GLS} \left ( \frac{\boldsymbol{u}_k -\boldsymbol{u}^n}{\Delta t} + \boldsymbol{u}_k \cdot \nabla \boldsymbol{u}_k + \nabla p_k - \nu \Delta \boldsymbol{u}_k \right)\cdot \left (\delta \boldsymbol{u} \cdot \nabla \boldsymbol{v} \right) \\
      & + \sum_\mathcal{T} \int_\mathcal{T} \tau_{LSIC} \nabla \cdot \delta \boldsymbol{u} \; \nabla \cdot \boldsymbol{v} = 0 . \\
 \end{split}
-$$
+```
 
 At each Newton iteration then we assemble the Jacobian and right-hand side, we solve the linear system for the update vectors and finally update the solution. This process is repeated until the norm of the residual falls below a predefined threshold, at which point we can move on to the next time step.
 
@@ -1241,7 +1241,12 @@ In this section we will show the results obtained for different polynomial order
 
 ### Re = 400
 This should be the easiest case, since the Reynolds number is relatively small. Indeed, we observe that the solution for all three configurations reaches a steady state in excellent agreement with the literature.
-![cavity flow, Re 400](./figures/cavity400_compare.mp4)
+
+
+
+https://github.com/user-attachments/assets/9c8c3483-3afd-4b75-ba08-b420f58e324c
+
+
 
 The only thing we gain with stabilisation here is that we can use equal-order elements, and that even with $\mathbb Q^1 -\mathbb Q^1$ we get a good accuracy. Indeed, if we were to use the standard formulation with this element, we would get something like this after just one time step.
 
@@ -1251,12 +1256,24 @@ The only thing we gain with stabilisation here is that we can use equal-order el
 ### Re = 1000
 Here we can start to see some differences between the three configurations. Namely, the $\mathbb Q^1 -\mathbb Q^1$ element seems to be a little less accurate than the others. This is interesting as it shows that the accuracy of $\mathbb Q^2 -\mathbb Q^2$ is better, even though the number of degrees of freedom is the same ( $\mathbb Q^1 -\mathbb Q^1$ has one extra mesh refinement ).
 
-![cavity flow, Re 1000](./figures/cavity1000_compare.mp4)
+
+
+
+
+https://github.com/user-attachments/assets/a2821a6c-fe92-48ea-8f60-e7f3992c14b3
+
+
+
+
 
 ### Re = 5000
 For this value of $Re$ there are noticeable differences between the three configurations, and overall the agreement with other data is not as good as before. Nonetheless, it should be noted that the steady state here is reached through time integration, and not by solving a stationary equation, and so the differences might disappear if we let the system evolve longer.
 
-![cavity flow, Re 5000](./figures/cavity5000_compare.mp4)
+
+
+https://github.com/user-attachments/assets/0cf4c8f8-8fd2-440b-a0c6-a195c92ccb2f
+
+
 
 From the plot at the final fime we notice that the non-stabilised formulation seems to be more accurate near the top of the cavity, where the stabilised solutions look smoother. This is indeed something we could attribute to the stabilisation.
 
@@ -1267,15 +1284,27 @@ As a final note, in this case we can start to see spuriuos pressure modes in the
 ### Re = 7500
 In this case the three configurations are very different from one another and the agreement with data is not so good either. In this case it can be seen from the movie that by the end of the simulation there are still some oscillations in the velocity, especially near the centre of the cavity. Moreover, near the centre, the stabilised $\mathbb Q^1 -\mathbb Q^1$ is very close to the non-stabilised $\mathbb Q^2 -\mathbb Q^1$, while using substantially fewer degrees of freedom. The $\mathbb Q^2 -\mathbb Q^2$ seems to be the least accurate in the central region, but the most accurate near the edges.
 
-![cavity flow, Re 7500](./figures/cavity7500_compare.mp4)
+
+
+https://github.com/user-attachments/assets/7d968737-a665-4068-9611-414cd40ff9b3
+
+
 
 Here we should also address the fact that for the non-stabilised formulation we have the same degree for velocity as in $\mathbb Q^2 -\mathbb Q^2$ but one extra refinement level, which means that the this should be able to resolve velocity better than both the others. What is interesting here is that if we coarsen the mesh in the $\mathbb Q^2 -\mathbb Q^1$ configuration -- so that now the velocity DoFs are the same as in $\mathbb Q^2 -\mathbb Q^2$ -- the simulation does no longer converge. This would probably not be the case for lower $Re$.
 
-![cavity flow, Re 7500, blowup](./figures/cavity7500_nonstable_blowup.mp4)
+
+
+https://github.com/user-attachments/assets/07f389d0-d1a1-4a55-99e5-99aab72511c0
+
+
 
 Differently, if we keep the same configuration but now we stabilise the equation, we get a stable simulation whose results are very similar to the ones above.
 
-![cavity flow, Re 7500, stable q2q1](./figures/cavity7500_q2q1_5_stabilised.mp4)
+
+
+https://github.com/user-attachments/assets/f6e54fe3-a20f-4265-8b73-c5155415f4bd
+
+
 
 ## Possibilities of extension
 At the time of writing this, saNSs can be used to run simulations on 3 different test cases, with fixed meshes and time-step. Natural extensions would then be adaptive mesh refinement and time stepping.
